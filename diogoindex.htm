@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diogo - Perfil Pessoal e Profissional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 50%, #0a0a0a 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Watermark */
+        .watermark-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.03;
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="40"></text></svg>'),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="40">🍴</text></svg>'),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="50" font-size="40">✈️</text></svg>');
+            background-size: 200px 200px, 200px 200px, 200px 200px;
+            background-position: 0 0, 100px 100px, 200px 50px;
+            pointer-events: none;
+        }
+
+        /* Language Flags */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+        }
+
+        .flag-btn {
+            width: 50px;
+            height: 35px;
+            border: 3px solid #FFD700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .flag-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .flag-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 20px 50px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(80,0,80,0.4) 100%);
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .header h1 {
+            color: #FFD700;
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            letter-spacing: 3px;
+        }
+
+        .header p {
+            color: #e0e0e0;
+            font-size: 1.3em;
+            font-style: italic;
+        }
+
+        /* Photos Grid */
+        .photos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .photo-card {
+            position: relative;
+            background: linear-gradient(135deg, #1a0a1a 0%, #0a0a0a 100%);
+            border: 4px solid #FFD700;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .photo-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 50px rgba(255, 215, 0, 0.5);
+        }
+
+        .photo-card img {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .photo-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            padding: 30px;
+            color: #FFD700;
+        }
+
+        .photo-overlay h3 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .photo-overlay p {
+            color: #e0e0e0;
+            font-size: 1em;
+        }
+
+        .click-hint {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #FFD700;
+            color: #000;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a0a1a 0%, #0a0a0a 100%);
+            border: 4px solid #FFD700;
+            border-radius: 20px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(255, 215, 0, 0.4);
+            animation: modalSlide 0.4s ease;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2.5em;
+            color: #FFD700;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid #FFD700;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-modal:hover {
+            background: #FFD700;
+            color: #000;
+            transform: rotate(90deg);
+        }
+
+        .modal h2 {
+            color: #FFD700;
+            font-size: 2.2em;
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 3px solid #800080;
+            padding-bottom: 15px;
+        }
+
+        .modal-text {
+            color: #e0e0e0;
+            font-size: 1.1em;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        .modal-text p {
+            margin-bottom: 15px;
+        }
+
+        .highlight {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        /* Contact Section */
+        .contact-section {
+            text-align: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(80,0,80,0.4) 100%);
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            margin-top: 40px;
+        }
+
+        .contact-section h2 {
+            color: #FFD700;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+
+        .whatsapp-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.3em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4);
+            border: 3px solid #FFD700;
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 35px rgba(37, 211, 102, 0.6);
+        }
+
+        .whatsapp-btn svg {
+            width: 35px;
+            height: 35px;
+            fill: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .photos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                padding: 25px;
+            }
+            
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #FFD700;
+            border-radius: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #800080;
+        }
+    </style>
+</head>
+<body>
+    <div class="watermark-bg"></div>
+
+    <!-- Language Selector -->
+    <div class="language-selector">
+        <button class="flag-btn" onclick="changeLanguage('pt')" title="Português">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Flag_of_Brazil.svg/1200px-Flag_of_Brazil.svg.png" alt="Brasil">
+        </button>
+        <button class="flag-btn" onclick="changeLanguage('en')" title="English">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Flag_of_the_United_States.svg/1200px-Flag_of_the_United_States.svg.png" alt="USA">
+        </button>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1 id="mainTitle">DIOGO</h1>
+            <p id="subtitle">Empresário | Treinador de Futebol | Pai de Família</p>
+        </div>
+
+        <!-- Photos Grid -->
+        <div class="photos-grid">
+            <!-- Personal Photo -->
+            <div class="photo-card" onclick="openModal('personal')">
+                <div class="click-hint">Clique aqui</div>
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop" alt="Diogo Pessoal">
+                <div class="photo-overlay">
+                    <h3 id="personalTitle">Vida Pessoal</h3>
+                    <p id="personalDesc">Conheça minha história pessoal e familiar</p>
+                </div>
+            </div>
+
+            <!-- Professional Photo (Soccer) -->
+            <div class="photo-card" onclick="openModal('coach')">
+                <div class="click-hint">Clique aqui</div>
+                <img src="cid:1" alt="Diogo Treinador">
+                <div class="photo-overlay">
+                    <h3 id="coachTitle">Treinador de Futebol</h3>
+                    <p id="coachDesc">Formando jovens atletas e cidadãos</p>
+                </div>
+            </div>
+
+            <!-- Business Photo -->
+            <div class="photo-card" onclick="openModal('business')">
+                <div class="click-hint">Clique aqui</div>
+                <img src="cid:2" alt="Diogo Empresário">
+                <div class="photo-overlay">
+                    <h3 id="businessTitle">Empresário</h3>
+                    <p id="businessDesc">Alzahtar Culinária Árabe e outras empresas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h2 id="contactTitle">Entre em Contato</h2>
+            <a href="https://wa.me/5561993512128" class="whatsapp-btn" target="_blank">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                <span id="whatsappText">Falar no WhatsApp</span>
+            </a>
+            <p style="color: #e0e0e0; margin-top: 20px; font-size: 1.1em;">+55 61 99351-2128</p>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal" class="modal" onclick="closeModalOutside(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // Translations
+        const translations = {
+            pt: {
+                mainTitle: "DIOGO",
+                subtitle: "Empresário | Treinador de Futebol | Pai de Família",
+                personalTitle: "Vida Pessoal",
+                personalDesc: "Conheça minha história pessoal e familiar",
+                coachTitle: "Treinador de Futebol",
+                coachDesc: "Formando jovens atletas e cidadãos",
+                businessTitle: "Empresário",
+                businessDesc: "Alzahtar Culinária Árabe e outras empresas",
+                contactTitle: "Entre em Contato",
+                whatsappText: "Falar no WhatsApp",
+                personalModal: `
+                    <h2>Vida Pessoal e Familiar</h2>
+                    <div class="modal-text">
+                        <p>Olá! Sou <span class="highlight">Diogo</span>, tenho <span class="highlight">42 anos</span> e sou formado em <span class="highlight">Direito</span>.</p>
+                        
+                        <p>Sou um homem profundamente <span class="highlight">religioso e familiar</span>. Estou casado há <span class="highlight">25 anos</span> e tenho <span class="highlight">4 filhos</span>, que são a razão da minha vida.</p>
+                        
+                        <p>Nos meus horários vagos, gosto de <span class="highlight">fazer coisas com minha família</span>. Acredito que o tempo passado juntos é o bem mais precioso que podemos ter.</p>
+                        
+                        <p>Minha missão de vida é <span class="highlight">sempre dar apoio e amparar minha família</span>, sendo um pilar de sustentação e exemplo para meus filhos e minha esposa.</p>
+                        
+                        <p>A fé e os valores familiares são a base de tudo o que faço, e é isso que me motiva a ser cada dia melhor como pai, marido e cidadão.</p>
+                    </div>
+                `,
+                coachModal: `
+                    <h2>Treinador de Futebol</h2>
+                    <div class="modal-text">
+                        <p>O futebol sempre foi minha <span class="highlight">grande paixão</span>. Tive uma <span class="highlight">carreira profissional curta</span> devido a lesões, mas meu amor pelo esporte nunca diminuiu.</p>
+                        
+                        <p>Hoje, como <span class="highlight">treinador de futebol</span>, dedico minha vida a ensinar crianças e adolescentes que desejam seguir carreira no esporte.</p>
+                        
+                        <p>Meu trabalho vai muito além das quatro linhas. Trabalho principalmente ensinando:</p>
+                        
+                        <p>• <span class="highlight">Respeito</span> - aos colegas, adversários e autoridades<br>
+                        • <span class="highlight">Hierarquia</span> - entendendo a importância da disciplina<br>
+                        • <span class="highlight">Tomadas de decisão sob pressão</span> - preparando-os para a vida</p>
+                        
+                        <p>Acredito que o futebol é uma ferramenta poderosa para formar não apenas atletas, mas <span class="highlight">cidadãos de caráter</span>.</p>
+                        
+                        <p>Ver meus alunos crescendo e se desenvolvendo tanto dentro quanto fora de campo é minha maior recompensa.</p>
+                    </div>
+                `,
+                businessModal: `
+                    <h2>Empresário</h2>
+                    <div class="modal-text">
+                        <p>Sou empresário e tenho <span class="highlight">2 empresas no Brasil</span>.</p>
+                        
+                        <p><span class="highlight">Alzahtar Culinária Árabe</span> - Minha primeira empresa no ramo alimentício, especializada em culinária árabe. Atualmente, quem toca o negócio é minha <span class="highlight">mãe</span>, que leva o empreendimento com muito carinho e dedicação.</p>
+                        
+                        <p>Além disso, atuo como <span class="highlight">agente de turismo</span>, ajudando pessoas a realizarem seus sonhos de viagem.</p>
+                        
+                        <p>Minha trajetória empresarial é marcada pela <span class="highlight">diversificação</span> e pelo compromisso com a qualidade e o atendimento excellence.</p>
+                        
+                        <p>Cada negócio representa uma parte da minha história e dos meus valores: tradição familiar, paixão pela gastronomia e o desejo de conectar pessoas através do turismo.</p>
+                    </div>
+                `
+            },
+            en: {
+                mainTitle: "DIOGO",
+                subtitle: "Entrepreneur | Soccer Coach | Family Man",
+                personalTitle: "Personal Life",
+                personalDesc: "Learn about my personal and family story",
+                coachTitle: "Soccer Coach",
+                coachDesc: "Training young athletes and citizens",
+                businessTitle: "Entrepreneur",
+                businessDesc: "Alzahtar Arabic Cuisine and other businesses",
+                contactTitle: "Get in Touch",
+                whatsappText: "Chat on WhatsApp",
+                personalModal: `
+                    <h2>Personal and Family Life</h2>
+                    <div class="modal-text">
+                        <p>Hello! I'm <span class="highlight">Diogo</span>, I'm <span class="highlight">42 years old</span> and I have a degree in <span class="highlight">Law</span>.</p>
+                        
+                        <p>I'm a deeply <span class="highlight">religious and family-oriented</span> man. I've been married for <span class="highlight">25 years</span> and have <span class="highlight">4 children</span>, who are the reason for my life.</p>
+                        
+                        <p>In my spare time, I enjoy <span class="highlight">doing things with my family</span>. I believe that time spent together is the most precious asset we can have.</p>
+                        
+                        <p>My life mission is to <span class="highlight">always support and help my family</span>, being a pillar of strength and example for my children and my wife.</p>
+                        
+                        <p>Faith and family values are the foundation of everything I do, and that's what motivates me to be better every day as a father, husband, and citizen.</p>
+                    </div>
+                `,
+                coachModal: `
+                    <h2>Soccer Coach</h2>
+                    <div class="modal-text">
+                        <p>Soccer has always been my <span class="highlight">great passion</span>. I had a <span class="highlight">short professional career</span> due to injuries, but my love for the sport has never diminished.</p>
+                        
+                        <p>Today, as a <span class="highlight">soccer coach</span>, I dedicate my life to teaching children and teenagers who wish to pursue a career in sports.</p>
+                        
+                        <p>My work goes far beyond the field. I mainly work teaching:</p>
+                        
+                        <p>• <span class="highlight">Respect</span> - for colleagues, opponents and authorities<br>
+                        • <span class="highlight">Hierarchy</span> - understanding the importance of discipline<br>
+                        • <span class="highlight">Decision-making under pressure</span> - preparing them for life</p>
+                        
+                        <p>I believe that soccer is a powerful tool for shaping not just athletes, but <span class="highlight">citizens of character</span>.</p>
+                        
+                        <p>Watching my students grow and develop both on and off the field is my greatest reward.</p>
+                    </div>
+                `,
+                businessModal: `
+                    <h2>Entrepreneur</h2>
+                    <div class="modal-text">
+                        <p>I'm an entrepreneur and I have <span class="highlight">2 businesses in Brazil</span>.</p>
+                        
+                        <p><span class="highlight">Alzahtar Arabic Cuisine</span> - My first business in the food industry, specializing in Arabic cuisine. Currently, my <span class="highlight">mother</span> runs the business, managing it with great care and dedication.</p>
+                        
+                        <p>In addition, I work as a <span class="highlight">travel agent</span>, helping people realize their travel dreams.</p>
+                        
+                        <p>My business journey is marked by <span class="highlight">diversification</span> and commitment to quality and excellent service.</p>
+                        
+                        <p>Each business represents a part of my history and values: family tradition, passion for gastronomy, and the desire to connect people through tourism.</p>
+                    </div>
+                `
+            }
+        };
+
+        let currentLang = 'pt';
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('personalTitle').textContent = t.personalTitle;
+            document.getElementById('personalDesc').textContent = t.personalDesc;
+            document.getElementById('coachTitle').textContent = t.coachTitle;
+            document.getElementById('coachDesc').textContent = t.coachDesc;
+            document.getElementById('businessTitle').textContent = t.businessTitle;
+            document.getElementById('businessDesc').textContent = t.businessDesc;
+            document.getElementById('contactTitle').textContent = t.contactTitle;
+            document.getElementById('whatsappText').textContent = t.whatsappText;
+            
+            // Update HTML lang attribute
+            document.documentElement.lang = lang === 'pt' ? 'pt-BR' : 'en-US';
+        }
+
+        function openModal(type) {
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            
+            modalBody.innerHTML = translations[currentLang][type + 'Modal'];
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function closeModalOutside(event) {
+            if (event.target === event.currentTarget) {
+                closeModal();
+            }
+        }
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
